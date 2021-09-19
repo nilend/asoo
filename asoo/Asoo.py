@@ -10,9 +10,10 @@ class Asoo(object):
             with open(csv, encoding='utf8') as reader:
                 with open('results.csv', 'w', newline='', encoding='utf8') as writer:
                     csv_reader = c.DictReader(
-                        reader, fieldnames=('provider', 'url'))
+                        reader, fieldnames=('provider', 'product', 'ram', 'rom', 'net', 'url'))
                     csv_writer = c.DictWriter(
-                        writer, fieldnames=('provider', 'product', 'color', 'price'), quoting=c.QUOTE_NONNUMERIC)
+                        writer, fieldnames=('provider', 'product', 'ram', 'rom', 'net', 'color', 'price'), quoting=c.QUOTE_NONNUMERIC)
+                    csv_writer.writeheader()
                     for row in csv_reader:
                         if row['provider'].lower() == 'mobile140':
                             rows = Mobile140Extractor().extract(row)

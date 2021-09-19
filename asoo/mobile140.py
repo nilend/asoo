@@ -21,13 +21,12 @@ class Mobile140Extractor(object):
         for color in colors:
             if color.checked:
                 results.append(self.getResult(
-                    Mobile140Extractor.PROVIDER, product.name, color.name, price))
+                    Mobile140Extractor.PROVIDER, productInfo['product'], productInfo['ram'], productInfo['rom'], productInfo['net'], color.name, price))
             else:
                 url = f"https://www.mobile140.com/fa/price_show.html&priceid=&colorid={color.id}&productid={product.id}&ajax=ok"
-                coloredDoc = parse(urlopen(url)).getroot()
+                coloredDoc = parse(urlopen(url), parser=parser).getroot()
                 results.append(self.getResult(
-                    Mobile140Extractor.PROVIDER, product.name, color.name, self.getPrice(coloredDoc)))
-
+                    Mobile140Extractor.PROVIDER, productInfo['product'], productInfo['ram'], productInfo['rom'], productInfo['net'], color.name, self.getPrice(coloredDoc)))
         return results
 
     def getProduct(self, doc):
@@ -59,5 +58,5 @@ class Mobile140Extractor(object):
             colors.append(color)
         return colors
 
-    def getResult(self, provider, title, color, price):
-        return {'provider': provider, 'product': title, 'color': color, 'price': price}
+    def getResult(self, provider, title, ram, rom, net, color, price):
+        return {'provider': provider, 'product': title, 'ram': ram, 'rom': rom, 'net': net, 'color': color, 'price': price}
