@@ -15,8 +15,11 @@ class Asoo(object):
                         writer, fieldnames=('provider', 'product', 'ram', 'rom', 'net', 'color', 'price'), quoting=c.QUOTE_NONNUMERIC)
                     csv_writer.writeheader()
                     for row in csv_reader:
-                        if row['provider'].lower() == 'mobile140':
-                            rows = Mobile140Extractor().extract(row)
-                            csv_writer.writerows(rows)
+                        if row['provider'].lower() == 'mobile140' and row['url']:
+                            try:
+                                rows = Mobile140Extractor().extract(row)
+                                csv_writer.writerows(rows)
+                            except Exception as e:
+                                print(e, row)
         else:
             print("File %s not exist" % csv)
