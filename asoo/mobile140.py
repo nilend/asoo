@@ -4,11 +4,12 @@ from lxml.html import parse, HTMLParser
 from urllib.request import urlopen
 from urllib.parse import quote
 from types import SimpleNamespace
+from unidecode import unidecode
 
 
 class Mobile140Extractor(object):
     PROVIDER = 'mobile140'
-    NOT_AVAILABLE = 'ناموجود'
+    NOT_AVAILABLE = 'N/A'
 
     def extract(self, productInfo):
         parser = HTMLParser(encoding='utf8')
@@ -42,7 +43,10 @@ class Mobile140Extractor(object):
     def getPrice(self, doc):
         spans = doc.cssselect('span.single__desc__price--new')
         if len(spans) > 0:
-            return spans[0].text_content().split(' ')[0] if spans[0].text_content() is not None else self.NOT_AVAILABLE
+            price = spans[0].text_content().split(
+                ' ')[0] if spans[0].text_content() is not None else self.NOT_AVAILABLE
+            price = unidecode(price)
+            return price
         return self.NOT_AVAILABLE
 
     def getColors(self, doc):
