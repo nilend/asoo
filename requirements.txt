@@ -1,3 +1,5 @@
 fire
 cssselect
 lxml
+unidecode
+requests
