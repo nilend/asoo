@@ -2,6 +2,7 @@
 import csv as c
 import os.path
 from mobile140 import Mobile140Extractor
+from hamrahtel import HamrahtelExtractor
 
 
 class Asoo(object):
@@ -14,12 +15,22 @@ class Asoo(object):
                     csv_writer = c.DictWriter(
                         writer, fieldnames=('provider', 'product', 'ram', 'rom', 'net', 'color', 'price'), quoting=c.QUOTE_NONNUMERIC)
                     csv_writer.writeheader()
+                    results = []
                     for row in csv_reader:
-                        if row['provider'].lower() == 'mobile140' and row['url']:
-                            try:
-                                rows = Mobile140Extractor().extract(row)
-                                csv_writer.writerows(rows)
-                            except Exception as e:
-                                print(e, row)
+                        provider = row['provider'].lower()
+                        if row['url']:
+                            if provider == Mobile140Extractor.PROVIDER:
+                                results.extend(self.execute(
+                                    row, Mobile140Extractor()))
+                            elif provider == HamrahtelExtractor.PROVIDER:
+                                results.extend(self.execute(
+                                    row, HamrahtelExtractor()))
+                    csv_writer.writerows(results)
         else:
             print("File %s not exist" % csv)
+
+    def execute(self, row, provider):
+        try:
+            return provider.extract(row)
+        except Exception as e:
+            print(e, row)
