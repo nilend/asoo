@@ -17,14 +17,16 @@ class Asoo(object):
                     csv_writer.writeheader()
                     results = []
                     for row in csv_reader:
-                        provider = row['provider'].lower()
-                        if row['url']:
+                        if row['url'] and row['provider']:
+                            provider = row['provider'].lower()
                             if provider == Mobile140Extractor.PROVIDER:
                                 results.extend(self.execute(
                                     row, Mobile140Extractor()))
                             elif provider == HamrahtelExtractor.PROVIDER:
                                 results.extend(self.execute(
                                     row, HamrahtelExtractor()))
+                        else:
+                            print('URL or provider is not available.', row)
                     csv_writer.writerows(results)
         else:
             print("File %s not exist" % csv)
