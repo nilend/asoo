@@ -1,11 +1,26 @@
 # -*- coding: utf-8 -*-
 import csv as c
 import os.path
+from technolife import TechnolifeExtractor
 from mobile140 import Mobile140Extractor
 from hamrahtel import HamrahtelExtractor
+import time
 
+
+def timer_func(func):
+
+   def function_timer(*args, **kwargs):
+    start = time.time()
+    value = func(*args, **kwargs)
+    end = time.time()
+    runtime = end - start
+    msg = "{func} took {time} seconds to complete its execution."
+    print(msg.format(func = func.__name__,time = runtime))
+    return value
+   return function_timer
 
 class Asoo(object):
+    @timer_func
     def extract(self, csv="urls.csv"):
         if os.path.exists(csv):
             with open(csv, encoding='utf8') as reader:
@@ -25,6 +40,9 @@ class Asoo(object):
                             elif provider == HamrahtelExtractor.PROVIDER:
                                 results.extend(self.execute(
                                     row, HamrahtelExtractor()))
+                            elif provider == TechnolifeExtractor.PROVIDER:
+                                results.extend(self.execute(
+                                    row, TechnolifeExtractor()))
                         else:
                             print('URL or provider is not available.', row)
                     csv_writer.writerows(results)
