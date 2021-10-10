@@ -1,5 +1,5 @@
 fire
-cssselect
-lxml
+
 unidecode
 requests
+beautifulsoup4

@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from lxml.html import parse, HTMLParser
-from urllib.request import urlopen
-from urllib.parse import quote
+import requests
+from bs4 import BeautifulSoup
 from types import SimpleNamespace
 from unidecode import unidecode
 
@@ -12,9 +11,8 @@ class Mobile140Extractor(object):
     NOT_AVAILABLE = 'N/A'
 
     def extract(self, productInfo):
-        parser = HTMLParser(encoding='utf8')
-        doc = parse(
-            urlopen(quote(productInfo['url'], safe='/:')), parser=parser).getroot()
+        req = requests.get(productInfo['url'])
+        doc = BeautifulSoup(req.content, 'html.parser')
         product = self.getProduct(doc)
         price = self.getPrice(doc)
         colors = self.getColors(doc)
@@ -25,40 +23,32 @@ class Mobile140Extractor(object):
                     Mobile140Extractor.PROVIDER, productInfo['product'], productInfo['ram'], productInfo['rom'], productInfo['net'], color.name, price))
             else:
                 url = f"https://www.mobile140.com/fa/price_show.html&priceid=&colorid={color.id}&productid={product.id}&ajax=ok"
-                coloredDoc = parse(urlopen(url), parser=parser).getroot()
+                coloredDoc = BeautifulSoup(
+                    requests.get(url).content, 'html.parser')
                 results.append(self.getResult(
                     Mobile140Extractor.PROVIDER, productInfo['product'], productInfo['ram'], productInfo['rom'], productInfo['net'], color.name, self.getPrice(coloredDoc)))
         return results
 
     def getProduct(self, doc):
-        pid = doc.cssselect('input#productid')[0].get('value')
-        name = self.getTitle(doc)
-        return SimpleNamespace(id=pid, name=name)
-
-    def getTitle(self, doc):
-        h1s = doc.cssselect('h1.innerPageTitle')
-        if len(h1s) > 0:
-            return h1s[0].text
+        pid = doc.select_one('#productid').get('value')
+        return SimpleNamespace(id=pid)
 
     def getPrice(self, doc):
-        spans = doc.cssselect('span.single__desc__price--new')
-        if len(spans) > 0:
-            price = spans[0].text_content().split(
-                ' ')[0] if spans[0].text_content() is not None else self.NOT_AVAILABLE
-            price = unidecode(price)
+        span = doc.select_one('span.single__desc__price--new span')
+        if span:
+            price = unidecode(span.get_text())
             return price
         return self.NOT_AVAILABLE
 
     def getColors(self, doc):
-        labels = doc.cssselect('label.select_color__label')
+        inputs = doc.select('label.select_color__label input[name=color]')
         colors = []
-        for label in labels:
+        for input in inputs:
             color = SimpleNamespace(checked=False, name='', id='')
-            input = label.cssselect('input[name=color]')[0]
-            if input.checked:
+            if input.has_attr('checked'):
                 color.checked = True
-            color.name = input.get('data-title')
             color.id = input.get('data-val')
+            color.name = input.get('data-title')
             colors.append(color)
         return colors
 
